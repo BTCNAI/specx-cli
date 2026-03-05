@@ -51,10 +51,23 @@ struct SpecXAPIClient {
             throw CLIError(message, exitCode: .networkOrHTTP, requestID: requestID)
         }
 
+        let decoder = JSONDecoder()
         do {
-            return try JSONDecoder().decode(CompileResponse.self, from: data)
+            let parsed = try decoder.decode(CompileResponse.self, from: data)
+            return CompileResponse(
+                specMd: parsed.specMd,
+                hash: parsed.hash,
+                requestId: parsed.requestId ?? requestID
+            )
         } catch {
-            throw CLIError("failed to parse service response", exitCode: .serverOrParsing, requestID: requestID)
+            let status = httpResponse.statusCode
+            let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type") ?? "unknown"
+            let raw = String(data: data.prefix(2048), encoding: .utf8) ?? "<non-utf8 body>"
+            FileHandle.standardError.write(Data("Error: failed to parse service response\n".utf8))
+            FileHandle.standardError.write(Data("HTTP: \(status)\n".utf8))
+            FileHandle.standardError.write(Data("Content-Type: \(contentType)\n".utf8))
+            FileHandle.standardError.write(Data("Body (first 2048 bytes):\n\(raw)\n".utf8))
+            throw error
         }
     }
 

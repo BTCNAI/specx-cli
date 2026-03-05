@@ -66,7 +66,15 @@ struct CompileCommand: AsyncParsableCommand {
             )
 
             let response = try await client.compile(request: request)
-            let content = hashOnly ? response.specHash : response.specMD
+            let content: String
+            if hashOnly {
+                guard let hash = response.hash else {
+                    throw CLIError("response missing hash field", exitCode: .serverOrParsing, requestID: response.requestId)
+                }
+                content = hash
+            } else {
+                content = response.specMd
+            }
             try IO.writeText(content, to: output)
         } catch let error as CLIError {
             ErrorPrinter.printError(error)
