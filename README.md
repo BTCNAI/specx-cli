@@ -4,24 +4,22 @@
 
 ## Install
 
-### Build from source
+### macOS (download prebuilt binary)
 
 ```bash
-git clone <your-repo-url>
-cd specx-cli
-swift build -c release
-./.build/release/specx --help
-```
+# Download v0.1.3 assets
+curl -L -o specx-macos https://github.com/BTCNAI/specx-cli/releases/download/v0.1.3/specx-macos
+curl -L -o specx-macos.sha256 https://github.com/BTCNAI/specx-cli/releases/download/v0.1.3/specx-macos.sha256
 
-### Install from GitHub Release artifact
+# Verify checksum (optional but recommended)
+shasum -a 256 -c specx-macos.sha256
 
-1. Download `specx-macos-arm64.tar.gz` or `specx-macos-x86_64.tar.gz` from Releases.
-2. Extract and move `specx` into your PATH.
+# Install
+chmod +x specx-macos
+sudo mv specx-macos /usr/local/bin/specx
 
-```bash
-tar -xzf specx-macos-arm64.tar.gz
-chmod +x specx
-mv specx /usr/local/bin/specx
+# Test
+specx --help
 ```
 
 ## Usage
