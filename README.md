@@ -11,12 +11,15 @@
 curl -L -o specx-macos https://github.com/BTCNAI/specx-cli/releases/download/v0.1.3/specx-macos
 curl -L -o specx-macos.sha256 https://github.com/BTCNAI/specx-cli/releases/download/v0.1.3/specx-macos.sha256
 
-# Verify checksum (optional but recommended)
-shasum -a 256 -c specx-macos.sha256
+# Verify checksum (works for both "HASH" and "HASH  filename" formats)
+( shasum -a 256 -c specx-macos.sha256 2>/dev/null ) || \
+( echo "$(cat specx-macos.sha256)  specx-macos" | shasum -a 256 -c - )
 
 # Install
 chmod +x specx-macos
-sudo mv specx-macos /usr/local/bin/specx
+sudo mkdir -p /usr/local/bin /opt/homebrew/bin 2>/dev/null || true
+sudo install -m 0755 specx-macos /usr/local/bin/specx 2>/dev/null || \
+sudo install -m 0755 specx-macos /opt/homebrew/bin/specx
 
 # Test
 specx --help
