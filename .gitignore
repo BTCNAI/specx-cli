@@ -1,9 +1,10 @@
-
 # SwiftPM
 .build/
 .swiftpm/
-Package.resolved
 
 # Xcode
 DerivedData/
 *.xcworkspace
+
+# macOS
+.DS_Store
