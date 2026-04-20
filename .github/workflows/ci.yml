@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.app/Contents/Developer
+    
+    - name: Build
+      run: swift build
+    
+    - name: Run tests
+      run: swift test
+    
+  release:
+    needs: build
+    runs-on: macos-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Select Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.app/Contents/Developer
+    
+    - name: Build release binary
+      run: swift build -c release --arch arm64 --arch x86_64
+    
+    - name: Create universal binary
+      run: |
+        lipo -create -output specx-macos \
+          .build/release/specx-cli \
+          .build/release/specx-cli
+    
+    - name: Generate checksum
+      run: shasum -a 256 specx-macos > specx-macos.sha256
+    
+    - name: Upload to release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          specx-macos
+          specx-macos.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
